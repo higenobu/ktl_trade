@@ -604,7 +604,7 @@ def hensai_order_topix(tkey,sakimono,direction,night):
     elif (direction=='2'):
         hensai='1'
     if (hold):
-        obj = { 'Password': 'go2ujiyamada',
+        obj = { 'Password': 'xxxxxx',
         'Symbol': fsymbol,
         'Exchange': exflag,
         'TradeType': 2,  #1:shinki 2:hensai
@@ -664,7 +664,7 @@ def send_first_order_topix(tkey,direction,qnum,night):
     else:
         exchange=23
     
-    obj = { 'Password': 'go2ujiyamada',
+    obj = { 'Password': 'xxxxxxx',
         'Symbol': fsymbol,
         'Exchange': exchange,
         'TradeType': 1,  #1:shinki 2:hensai
