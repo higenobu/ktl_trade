@@ -359,7 +359,7 @@ def send_order4(sakimono,yobi,direction,hold,qnum,night):
     elif (direction=='2'):
         hensai='1'
     if (hold):
-        obj = { 'Password': 'go2ujiyamada',
+        obj = { 'Password': 'xxxxxxxx',
         'Symbol': fsymbol,
         'Exchange': exflag,
         'TradeType': 2,  #1:shinki 2:hensai
