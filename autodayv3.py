@@ -59,7 +59,7 @@ def send_first_order_daya(tkey,sakimono,yobi,direction,qnum,night):
 
     exchange=23
     
-    obj = { 'Password': 'go2ujiyamada',
+    obj = { 'Password': 'xxxxxxxx',
         'Symbol': fsymbol,
         'Exchange': exchange,
         'TradeType': 1,  #1:shinki 2:hensai
