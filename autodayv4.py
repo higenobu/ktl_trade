@@ -2,7 +2,6 @@
 import sys
 import csv
 import os
-#import mojimoji
 import time
 import datetime
 from datetime import timedelta
@@ -13,50 +12,12 @@ import json
 import pprint
 from datetime import datetime
 import pytz
-#04-12-2021 change 05:30 -> 05:20 at auto2(def)
-#06-02-2021 lesscut/ekidashi each 5 units until all units
-#debug
-#2021-12-10 add
-def write_to_entryq(path,cprice,yobi,direction,jtime):
-    if (yobi=='1'):
-        filenm='mentryqn.txt'
-    elif (yobi=='2'):
-        filenm='tentryqn.txt'
-    elif (yobi=='3'):
-        filenm='wentryqn.txt'
-    elif (yobi=='4'):
-        filenm='hentryqn.txt'
-    elif (yobi=='5'):
-        filenm='fentryqn.txt'        
-    else:
-        print ("not monday/tuesday/wend/thurs")
-    cont=''
-    #initq,date,actionyobi,direction +","+str(cprice[2]) time
-    cont=str(cprice[1])+","+str(cprice[0])+","+str(yobi)+","+str(direction)+","+str(jtime)
-    with open(path+"\\"+filenm,'w') as entry:
-        entry.write(cont)
-   
 
-    return cont
-def write_to_yose(path,cprice,yobi,direction,jtime):
-    
-    filenm='yosen.txt'
 
-    cont=''
-    #initq,date,actionyobi,direction +","+str(cprice[2]) time
-    cont=str(cprice[1])+","+str(cprice[0])+","+str(yobi)+","+str(direction)+","+str(jtime)
-    with open(path+"\\"+filenm,'w') as entry:
-        entry.write(cont)
-   
-
-    return cont
 #***************************************** 
 def send_first_order_daya(pwd,tkey,sakimono,yobi,direction,qnum,night):
 
     fsymbol=sakimono    
-
-
-
     exchange=23
     
     obj = { 'Password': pwd,
@@ -116,74 +77,9 @@ def sendmsg2topix(topixfile,tag):
         entry.write(cont)  
           
 
-
-
-def position(jdate2):
-    with open('kabutoken.txt','r') as token:
-        tkey=token.read(100) 
-    shokai=[]   
-    url = 'http://localhost:18080/kabusapi/positions'
-#0 is all
-    params = { 'product': 3, }
-    req = urllib.request.Request('{}?{}'.format(url, urllib.parse.urlencode(params)), method='GET')
-    req.add_header('Content-Type', 'application/json')
-    req.add_header('X-API-KEY', tkey)
-
-    try:
-        with urllib.request.urlopen(req) as res:
-        #print(res.status, res.reason)
-            for header in res.getheaders():
-                pass
-            #print(header)
-        #print()
-            content = json.loads(res.read())
-            pprint.pprint(content)
-            print (len(content))
-            for i in range(len(content)):
-                todate=content[i]['ExecutionDay']
-                print (todate)
-                print (content[i]['Price'])
-                print (content[i]['CurrentPrice'])
-                print (content[i]['ExecutionID'])
-            
-                print (content[i]['SecurityType'])
-            
-                print (content[i]['Side'])
-                print (content[i]['HoldQty'])
-            
-                print (content[i]['LeavesQty'])
-                result=[todate,
-                content[i]['Price'],
-                content[i]['CurrentPrice'],
-                content[i]['ExecutionID'],
-            
-                content[i]['SecurityType'],
-            
-                content[i]['Side'],
-                content[i]['HoldQty'],
-            
-                content[i]['LeavesQty']]
-
-                shokai.append(result)
-        with open('position.txt', 'w') as q:
-            writer = csv.writer(q, delimiter=',')
-            writer.writerows(shokai)                
-        return shokai
-
-    except urllib.error.HTTPError as e:
-        print(e)
-        content = json.loads(e.read())
-        pprint.pprint(content)
-    except Exception as e:
-        print(e)
-
-#debug
-
-
-
-
 def get_nk225mini_quote(tkey,sakimono,tdate):
     #fsymbol='166060019' 
+    #print ("get quote")
     fsymbol=sakimono   
     url = 'http://localhost:18080/kabusapi/board/'+fsymbol+'@2'    
     #url = 'http://localhost:18080/kabusapi/board/166030019@2'
@@ -208,7 +104,7 @@ def get_nk225mini_quote(tkey,sakimono,tdate):
             ctime=fulltime[11:16]
             #print (ctime)
             cprice=[tdate,content['CurrentPrice'],ctime]
-            #print (cprice)
+            #print ("cprice",cprice)
             return cprice
 
        
@@ -220,94 +116,18 @@ def get_nk225mini_quote(tkey,sakimono,tdate):
         print(e)
 #********************************************
 
-def read_entry_quote2(yobi):
-    r=[]
-    path = os.getcwd()
-    if (yobi=='1'):
-        filenm='mentryqn.txt'
-        filenmrev='mentryqr.txt'
-    elif (yobi=='2'):
-        filenm='tentryqn.txt'
-        filenmrev='tentryqr.txt'
-    elif (yobi=='3'):
-        filenm='wentryqn.txt'
-        filenmrev='wentryqr.txt'
-    elif (yobi=='4'):
-        filenm='hentryqn.txt'
-        filenmrev='hentryqr.txt'
-    elif (yobi=='5'):
-        filenm='fentryqn.txt'
-        filenmrev='fentryqr.txt'
-    else:
-        print ("NO yobi 1 or 2")
-        filenm='mentryqn.txt'
-        filenmrev='mentryqr.txt'
-    with open(path+"\\"+filenm,'r') as entry:
-        res=entry.read(200)
-        wres=res
-        if (res==''):
-            pass
-        else:
-            r.append([wres])
-    with open(path+"\\"+filenmrev,'r') as entry2:
-        wres2=entry2.read(200)
-        
-        if (wres2==''):
-            pass
-        else:
-            r.append([wres2])
-       
-    return r
-#*******************
-
-
-def get_entry_data3(actionyobi,one):
-    acts=read_entry_quote2(actionyobi)
-    print (actionyobi)
-    myose=0
-    if (one==1):
-        wone=1
-    else:
-        wone=0
-    if (acts):
-        act=acts[wone][0].split(',')
-        print ("entry-data ",act)
-        if (len(act)>0):
-            myose=float(act[0])
-        else:
-            myose=0
-    
-    return [actionyobi,myose]
-
-
 
 
 def send_order4a(pwd,tkey,sakimono,yobi,direction,hold,qnum,night):
 
 
     fsymbol=sakimono   
-    #url = 'http://localhost:18080/kabusapi/board/'+fsymbol+'@2'  
-     
-    
-    
+
     corder=0
     
     iqnum=1
     #daytrade
     exflag=23
-    
-    
-    
-        
-    #corder=''
-    #2020-12-05 changed to this format
-    #arrhid=[{'HoldID':hold,'Qty':qnum}]
-    
-    
-    #set hold position 
-    #2021-06-21
-    #arrhid=[{'HoldID':hold,'Qty':iqnum}]
-    #2021-12-20
     hold=''
     corder=0
     #******************************************
@@ -369,7 +189,6 @@ def auto402a(pwd,tkey,sakimono,begintime,endtime,actionyobi,direction,initq,qnum
     
     #debug '0'
     stdate=tdate
-    #lg=get_history('n225mini-1m-test.csv',stdate)
 
     sent='1'
     hold=''
@@ -382,18 +201,18 @@ def auto402a(pwd,tkey,sakimono,begintime,endtime,actionyobi,direction,initq,qnum
 
     timeZ_J=pytz.timezone('Asia/Tokyo')
     dt_j=datetime.now(timeZ_J)
-    #print ("Japan-time:",dt_j.strftime('%Y-%m-%d %H:%M:%S'))
+    print ("Japan-time:",dt_j.strftime('%Y-%m-%d %H:%M:%S'))
     jdate=dt_j.strftime('%Y%m%d')
     jdate2=dt_j.strftime('%Y-%m-%d')
     dt_j=datetime.now(timeZ_J)
     jtime=dt_j.strftime('%H:%M')
     
     jj=0
-    #debug 2021-12-05
-    #currprice=30000
+    
     breakflag=5
     night='2'
-    while (jtime>='08:45' and jtime<='15:10' ):    
+    print ("begintime",begintime)
+    while (jtime>=begintime and jtime<=endtime ):    
     
         jj+=1
             
@@ -539,10 +358,7 @@ def read_action(filenm):
 def hensai_order_topix(pwd,tkey,sakimono,direction,night):
 
     fsymbol=sakimono   
-    #url = 'http://localhost:18080/kabusapi/board/'+fsymbol+'@2'  
-     
-    
-    
+    #url = 'http://localhost:18080/kabusapi/board/'+fsymbol+'@2'      
     corder=0
     
     iqnum=1
@@ -612,14 +428,10 @@ def hensai_order_topix(pwd,tkey,sakimono,direction,night):
 #***************************************** 
 def send_first_order_topix(pwd,tkey,topix,direction,qnum,night):
     #*********************************
-    #03-10-2021 for debug imediate return
-    #return
-    #topix
-    #fsymbol='167060006'  
+
     fsymbol=topix
     qnum=1
-    #with open('kabutoken.txt','r') as token:
-    #    tkey=token.read(100)
+
     if (night=='1'):
         exchange=24
     else:
@@ -658,7 +470,6 @@ def send_first_order_topix(pwd,tkey,topix,direction,qnum,night):
     except Exception as e:
         print(e)
 #**************************************************        
-import scrapektl2
 #**************************
 if __name__ == '__main__':
     
@@ -693,10 +504,9 @@ if __name__ == '__main__':
     meki=0
     mlimit=0
     mend=0
+    initq=0
     holds=[]
-    hanten='0'
-    #this='QNUM'
-    
+    hanten='0'        
     ekionly='NO'
 
     holdposiiton=0
@@ -711,18 +521,20 @@ if __name__ == '__main__':
 
     #direction='2'   
     #***********************if night '1' otherwise '0'
-    night='1'
+    night='2'
     ekionly='NO'        
     only15m='NO'        
-    exchange=23     
-    endtime1='00:00'
-    endtime2='25:00'
-    #endtime2='22:15'
+    exchange=23
+    #all time     
+    starttime='00:00'
+    endtime='25:00'
+    
     #****************************************
     path = os.getcwd()
     #****************************************
     tkfilenm=path+"\\kabutoken.txt"
     sakimonofile=path+"\\sakimono.txt"
+    #set prediction score such as 1.0 or -1.0
     actionfile=path+"\\action.txt"
     topixfile=path+"\\topix.txt"
     with open(tkfilenm,'r') as token:
@@ -730,8 +542,7 @@ if __name__ == '__main__':
     #06-03-2021 fsymbol from sakimono
     with open(sakimonofile,'r') as saki:
         sakimono=saki.read(100)
-#******************************************************
-#******************************************sendnightorder
+
     timeZ_J=pytz.timezone('Asia/Tokyo')
     dt_j=datetime.now(timeZ_J)
     print ("Japan-time:",dt_j.strftime('%Y-%m-%d %H:%M:%S'))
@@ -739,7 +550,8 @@ if __name__ == '__main__':
     jyobi=dt_j.strftime('%w')
     j=0
     
-    #scrapektl2.scrktl()
+    #wait until 08:40 
+   
     while (jtime<'08:40' and j<6*120):
         j+=1
         dt_j=datetime.now(timeZ_J)
@@ -747,10 +559,8 @@ if __name__ == '__main__':
         jtime=dt_j.strftime('%H:%M')
         time.sleep(10)          
     
+   
     
-    #******************************
-    scrapektl2.scrktl()
-    #****************************
     confs=read_action(actionfile)    
     print ("action score:",confs)
     fscore=float(confs)
@@ -776,35 +586,42 @@ if __name__ == '__main__':
     #read mdayconfig.txt  and set direction and qnum
     actionyobi=jyobi     
     exchange=23
-    night='2'   
+      
     
     sendmsg2topix(topixfile,'0')
-    #kessai='NEW'
+    
        
    
     
     
 
     
-    print ("sent initial order")
+    
     print ("actionyobi,direction,qnum,night")
     print (actionyobi,direction,qnum,night)
     #send order
+    #this is for getting intiq
+    entrytime='08:45'
     if (sendflag=='1'):
         k=0
         res=send_first_order_daya(pwd,tkey,sakimono,actionyobi,direction,qnum,night)
         if (sendtopix=='1'):
-            rest=send_first_order_topix(pwd,tkey,topix,directionrev,qnum,night)
+            pass
+            #if you need to send topix
+            #rest=send_first_order_topix(pwd,tkey,topix,directionrev,qnum,night)
     else:
-        k=6*100+2
+        #k=6*100+2
+        k=0
         sendflag='0'
         sendtopix='0'
+        print ('set current price as the initq ')
+        entrytime='00:00'
     print ("END of new order issued then set entry data, can wait for 20 minutes")      
     
 #***************************************
     
     
-    entrytime='08:45'
+    
     while (k<6*100):
         k+=1
         
@@ -812,7 +629,7 @@ if __name__ == '__main__':
         print ("Japan-time:",dt_j.strftime('%Y-%m-%d %H:%M:%S'))    
         jdate2=dt_j.strftime('%Y-%m-%d')
         jhm=dt_j.strftime('%H:%M')
-        print (jdate2,jhm)
+        print (jhm)
 
         if (jhm<=entrytime):
             print ("No entry yet")
@@ -821,17 +638,16 @@ if __name__ == '__main__':
      
         else:
             cprice=get_nk225mini_quote(tkey,sakimono,jdate2)
-            print (cprice,jhm)
-            if (cprice[1]>0):
-                write_to_entryq(path,cprice,actionyobi,direction,jhm)
-                write_to_yose(path,cprice,actionyobi,direction,jhm) 
+            
+            #set initial quote
+            print ('cprice',cprice)
+            if (cprice[1]>0): 
                 initq=cprice[1] 
                 break
             else:
                 print ('No cprice')
                 time.sleep(10)
                 continue
-    print ("end of process")
     
 #**************************end of xend order and set entryq******
     mbuy=tbuy=msell=tsell=0
@@ -858,30 +674,23 @@ if __name__ == '__main__':
     kk=0
     res=0
     
-    #******start monioring****
     
-    #if (jtime>='08:45' and jtime<='15:10' ):
-    '''
-    entry_data=get_entry_data3(jyobi,0)
-    print ("entry-data ",entry_data)        
-    initq=entry_data[1]
-    '''
     
     print ("finally get initq and direction",initq,direction)
-    
+    if (initq>0):     
         print ("start monitoring")
         
 
         #************************monitoring *****************************************
         qnum=1
-        print ("beginnig qnum:",qnum)
-        #debug
+        
         sent='1'
-        #debug
+       
         rinitq=0
         
-        #loop inside until the end of daysession    
-        res=auto402a(pwd,tkey,sakimono,endtime1,endtime2,jyobi,direction,initq,qnum,jdate2,eki,loss,ekionly,night,sent,hold,rinitq,maisu)
+        #loop inside until the end of daysession   
+
+        res=auto402a(pwd,tkey,sakimono,starttime,endtime,jyobi,direction,initq,qnum,jdate2,eki,loss,ekionly,night,sent,hold,rinitq,maisu)
         print ("result code:",res)
     else:
         print ("ERROR:initq is wrong!, no monitoring and stop") 
@@ -898,7 +707,8 @@ if __name__ == '__main__':
             eflag=hensai_order_topix(pwd,tkey,topix,directionrev,night)    
 
                
-    else:    
+    else: 
+        #daytrade   
         night='2'                      
         hold=''
         qnum=1
